@@ -398,6 +398,7 @@ import sys
 start = int(sys.argv[1]) if len(sys.argv)>1 else 0
 end   = int(sys.argv[2]) if len(sys.argv)>2 else TOTAL*FPS
 outdir= sys.argv[3] if len(sys.argv)>3 else 'frames'
+os.makedirs(outdir, exist_ok=True)
 
 for fi in range(start, end):
     t = fi / FPS
