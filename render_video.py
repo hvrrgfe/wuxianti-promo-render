@@ -145,7 +145,8 @@ def scene_open(draw, t):
     # 渐变 underline
     if t>1.0:
         a=ease_out(clamp01((t-1.0)/0.5))
-        draw.rectangle([W/2-200, 200+fb_l.size/2+10, W/2-200+400*a, 200+fb_l.size/2+16], fill=C1+(int(200*a),))
+        if a>0.03:
+            draw.rectangle([W/2-200, 200+fb_l.size/2+10, W/2-200+max(400*a,1), 200+fb_l.size/2+16], fill=C1+(int(200*a),))
     # 副title
     if t>1.2:
         transparent_text_scene(draw,"不是题库，是题厂", W/2, 360, fb_m, t-1.2, C3, glow=True)
@@ -258,8 +259,9 @@ def scene_know(draw,t):
         ts=clamp01((t-tt)/0.5)
         if ts<=0: continue
         a=ease_out(ts); w=clamp01((t-tt)/0.8)
+        if w<0.03: continue
         # 三色块从左展开
-        x2=lerp(W/2-300, W/2+300, w)
+        x2=lerp(W/2-300+1, W/2+300, w)
         draw.rounded_rectangle([W/2-300, y, x2, y+bh], radius=18, outline=c+(int(120*a),), width=0,
                                fill=(c[0]//6, c[1]//6, c[2]//6, int(60*a)))
         draw.text((W/2-260, y+22), title, font=fb_m, fill=c+(int(255*a),))
