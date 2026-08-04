@@ -1,0 +1,41 @@
+name: render-promo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python, fonts, ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pil ffmpeg fonts-noto-cjk fonts-noto-color-emoji
+          python3 -c "import PIL; print('PIL', PIL.__version__)"
+          sudo mkdir -p /usr/share/fonts/noto
+          sudo cp /usr/share/fonts/opentype/noto/NotoSansCJK-*.ttc /usr/share/fonts/noto/ 2>/dev/null || true
+          ls /usr/share/fonts/noto/ | head
+
+      - name: Render all 1600 frames
+        run: |
+          ls -la render_video.py assets/
+          python3 -u render_video.py 0 1600 frames
+          echo "rendered frames: $(ls frames/*.png | wc -l)"
+
+      - name: Assemble MP4 with music
+        run: |
+          ffmpeg -y -framerate 20 -i frames/f%05d.png -c:v libx264 -pix_fmt yuv420p -crf 20 -movflags +faststart promo_silent.mp4
+          ffmpeg -y -i promo_silent.mp4 -stream_loop -1 -i assets/bgm_technology.mp3 -shortest -c:v copy -c:a aac -b:a 192k -movflags +faststart wuxianti_promo_final.mp4
+          echo "=== final ==="
+          ls -la wuxianti_promo_final.mp4
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wuxianti-promo-final
+          path: wuxianti_promo_final.mp4
+          retention-days: 7
